@@ -1,0 +1,44 @@
+[
+    {
+        "transactionName": "digitalSignExists",
+        "transactionLabel": "A test digitalSignExists transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "createDigitalSign",
+        "transactionLabel": "A test createDigitalSign transaction",
+        "arguments": [
+            "001",
+            "some value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "readDigitalSign",
+        "transactionLabel": "A test readDigitalSign transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "updateDigitalSign",
+        "transactionLabel": "A test updateDigitalSign transaction",
+        "arguments": [
+            "001",
+            "some other value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "deleteDigitalSign",
+        "transactionLabel": "A test deleteDigitalSign transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    }
+]
