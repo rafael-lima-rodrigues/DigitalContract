@@ -115,17 +115,17 @@ public final class DigitalSignContractTest {
 
         DigitalSign asset = new  DigitalSign();
         asset.setValue("{id:001, dados:teste, userid:100}");
-        Gson gson = new Gson();
-        Contrato contrato = new Contrato();
-        contrato = gson.fromJson(asset.getValue(), Contrato.class);
-        System.out.println(contrato.getDados());
+        //Gson gson = new Gson();
+        //Contrato contrato = new Contrato();
+        //contrato = gson.fromJson(asset.getValue(), Contrato.class);
+        //System.out.println(contrato.getDados());
 
         String json = asset.toJSONString();
         when(stub.getState("10001")).thenReturn(json.getBytes(StandardCharsets.UTF_8));
 
         DigitalSign returnedAsset = contract.readDigitalSign(ctx, "10001", "100");
         assertEquals(returnedAsset.getValue(), asset.getValue());
-        System.out.println(returnedAsset.getValue());
+        System.out.println("Leitura do contrato: "+ returnedAsset.getValue());
     }
 
     @Nested
