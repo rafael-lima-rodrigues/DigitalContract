@@ -1,7 +1,6 @@
 package org.example;
 
 import java.util.Date;
-import java.util.logging.SimpleFormatter;
 
 public class User {
 
@@ -9,4 +8,10 @@ public class User {
     private Date  dateOfBirth;
     private final String cpf;
 
+
+    public User(String name, Date dateOfBirth, String cpf) {
+        this.name = name;
+        this.dateOfBirth = dateOfBirth;
+        this.cpf = cpf;
+    }
 }
