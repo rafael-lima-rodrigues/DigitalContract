@@ -32,13 +32,13 @@ public class UserIdentityContract implements ContractInterface {
     }
 
     @Transaction()
-    public void createUserIdentity(Context ctx, String digitalSignId, String value) {
+    public void createUserIdentity(Context ctx, String digitalSignId, String userId) {
         boolean exists = userIdentityExists(ctx,digitalSignId);
         if (exists) {
             throw new RuntimeException("The asset "+digitalSignId+" already exists");
         }
         DigitalSign asset = new DigitalSign();
-        asset.setValue(value);
+        asset.setValue(userId);
         ctx.getStub().putState(digitalSignId, asset.toJSONString().getBytes(UTF_8));
     }
 
@@ -72,13 +72,6 @@ public class UserIdentityContract implements ContractInterface {
         }
         ctx.getStub().delState(digitalSignId);
     }
-    public boolean verificarUserId(String userId, String value){
-        Gson gson = new Gson();
-        Contrato contrato = gson.fromJson(value, Contrato.class);
-        if (userId.equals(contrato.getUserid())){
-            return true;
-        }
-        return false;
-    }
+
 
 }

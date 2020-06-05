@@ -80,9 +80,9 @@ public final class DigitalSignContractTest {
             ChaincodeStub stub = mock(ChaincodeStub.class);
             when(ctx.getStub()).thenReturn(stub);
 
-            String json = "{\"value\":\"TheDigitalSign\"}";
+            String json = "{\"value\":\"{id:001, dados:teste, userIdOwner:100}\"}";
 
-            contract.createDigitalSign(ctx, "10001", "TheDigitalSign");
+            contract.createDigitalSign(ctx, "10001", "{id:001, dados:teste, userIdOwner:100}");
 
             verify(stub).putState("10001", json.getBytes(UTF_8));
         }
@@ -114,7 +114,7 @@ public final class DigitalSignContractTest {
         when(ctx.getStub()).thenReturn(stub);
 
         DigitalSign asset = new  DigitalSign();
-        asset.setValue("{id:001, dados:teste, userid:100}");
+        asset.setValue("{id:001, dados:teste, userIdOwner:100}");
         //Gson gson = new Gson();
         //Contrato contrato = new Contrato();
         //contrato = gson.fromJson(asset.getValue(), Contrato.class);

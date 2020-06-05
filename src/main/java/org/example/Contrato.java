@@ -1,25 +1,25 @@
 package org.example;
 
+import com.google.gson.Gson;
+
+import java.util.List;
+
 public class Contrato{
     
-    private String id;
+    private  String id;
     private String dados;
-    private String userid;
+    private  String userIdOwner;
 
-    public String getUserid() {
-        return userid;
-    }
+    private List<String> listUserMembers;
 
-    public void setUserid(String userid) {
-        this.userid = userid;
+    public Contrato(String id, String dados, String userIdOwner) {
+        this.id = id;
+        this.dados = dados;
+        this.userIdOwner = userIdOwner;
     }
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getDados() {
@@ -28,5 +28,22 @@ public class Contrato{
 
     public void setDados(String dados) {
         this.dados = dados;
+    }
+
+    public String getUserIdOwner() {
+        return userIdOwner;
+    }
+
+    public void setUserIdOwner(String userIdOwner) {
+        this.userIdOwner = userIdOwner;
+    }
+
+    public static boolean verificarUserId(String userId, String value){
+        Gson gson = new Gson();
+        Contrato contrato = gson.fromJson(value, Contrato.class);
+        if (userId.equals(contrato.getUserIdOwner())){
+            return true;
+        }
+        return false;
     }
 }

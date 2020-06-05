@@ -13,6 +13,7 @@ import org.hyperledger.fabric.contract.annotation.Contact;
 import org.hyperledger.fabric.contract.annotation.Info;
 import org.hyperledger.fabric.contract.annotation.License;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.example.Contrato.verificarUserId;
 
 @Contract(name = "DigitalSignContract",
     info = @Info(title = "DigitalSign contract",
@@ -41,6 +42,8 @@ public class DigitalSignContract implements ContractInterface {
         if (exists) {
             throw new RuntimeException("The asset "+digitalSignId+" already exists");
         }
+        Gson gson = new Gson();
+        Contrato contrato = gson.fromJson(value, Contrato.class);
         DigitalSign asset = new DigitalSign();
         asset.setValue(value);
         ctx.getStub().putState(digitalSignId, asset.toJSONString().getBytes(UTF_8));
@@ -64,13 +67,13 @@ public class DigitalSignContract implements ContractInterface {
     }
 
     @Transaction()
-    public void updateDigitalSign(Context ctx, String digitalSignId, String newValue) {
+    public void updateDigitalSign(Context ctx, String digitalSignId, String newContrato) {
         boolean exists = digitalSignExists(ctx,digitalSignId);
         if (!exists) {
             throw new RuntimeException("The asset "+digitalSignId+" does not exist");
         }
         DigitalSign asset = new DigitalSign();
-        asset.setValue(newValue);
+        asset.setValue(newContrato);
 
         ctx.getStub().putState(digitalSignId, asset.toJSONString().getBytes(UTF_8));
     }
@@ -82,14 +85,6 @@ public class DigitalSignContract implements ContractInterface {
             throw new RuntimeException("The asset "+digitalSignId+" does not exist");
         }
         ctx.getStub().delState(digitalSignId);
-    }
-    public boolean verificarUserId(String userId, String value){
-        Gson gson = new Gson();
-        Contrato contrato = gson.fromJson(value, Contrato.class);
-        if (userId.equals(contrato.getUserid())){
-            return true;
-        }
-        return false;
     }
 
 }
