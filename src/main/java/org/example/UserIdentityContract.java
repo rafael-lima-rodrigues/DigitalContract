@@ -8,6 +8,8 @@ import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.*;
 
+import java.io.IOException;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Contract(name = "UserIdentityContract",
@@ -26,30 +28,40 @@ public class UserIdentityContract implements ContractInterface {
 
     }
     @Transaction()
-    public boolean userIdentityExists(Context ctx, String digitalSignId) {
-        byte[] buffer = ctx.getStub().getState(digitalSignId);
+    public boolean userIdentityExists(Context ctx, String userSignId) {
+        byte[] buffer = ctx.getStub().getState(userSignId);
         return (buffer != null && buffer.length > 0);
     }
 
-    @Transaction()
-    public void createUserIdentity(Context ctx, String digitalSignId, String userId) {
-        boolean exists = userIdentityExists(ctx,digitalSignId);
-        if (exists) {
-            throw new RuntimeException("The asset "+digitalSignId+" already exists");
-        }
-        DigitalSign asset = new DigitalSign();
-        asset.setValue(userId);
-        ctx.getStub().putState(digitalSignId, asset.toJSONString().getBytes(UTF_8));
-    }
+    /**
+     * metodo criada uma identidade de usuario para assinatura dos documentos.
+     * Caso ja exista a identidade ja exista o metodo returna uma Exception.
+     *
+     * @param ctx
+     * @param userSignId
+     * @param userData
+     *
+     */
 
     @Transaction()
-    public DigitalSign readUserIdentity(Context ctx, String digitalSignId, String userId) {
-        boolean exists = userIdentityExists(ctx,digitalSignId);
-        if (!exists) {
-            throw new RuntimeException("The asset "+digitalSignId+" does not exist");
+    public void createUserIdentity(Context ctx, String userSignId, String userData) throws IOException {
+        boolean exists = userIdentityExists(ctx,userSignId);
+        if (exists) {
+            throw new RuntimeException("The asset "+userSignId+" already exists");
         }
-        DigitalSign newAsset = DigitalSign.fromJSONString(new String(ctx.getStub().getState(digitalSignId),UTF_8));
-        return newAsset;
+        User user = User.fromJSONString(userData);
+        ctx.getStub().putStringState(userSignId, user.toJSONString());
+    }
+
+
+    @Transaction()
+    public User readUserIdentity(Context ctx, String userId) throws IOException {
+        boolean exists = userIdentityExists(ctx,userId);
+        if (!exists) {
+            throw new RuntimeException("The asset "+ userId +" does not exist");
+        }
+        User user = User.fromJSONString(new String(ctx.getStub().getStringState(userId)));
+        return user;
     }
 
     @Transaction()

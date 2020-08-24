@@ -123,9 +123,9 @@ public final class DigitalSignContractTest {
         String json = asset.toJSONString();
         when(stub.getState("10001")).thenReturn(json.getBytes(StandardCharsets.UTF_8));
 
-        DigitalSign returnedAsset = contract.readDigitalSign(ctx, "10001", "100");
-        assertEquals(returnedAsset.getValue(), asset.getValue());
-        System.out.println("Leitura do contrato: "+ returnedAsset.getValue());
+        String returnedAsset = contract.readDigitalSign(ctx, "10001", "100").toJSONString();
+        assertEquals(returnedAsset, asset.getValue());
+        System.out.println("Leitura do contrato: "+ returnedAsset);
     }
 
     @Nested
