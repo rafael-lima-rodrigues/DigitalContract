@@ -17,7 +17,7 @@ public class User {
     @Property
     private String name;
     @Property
-    private LocalDate  dateOfBirth;
+    private String dateOfBirth;
     @Property
     private String cpf;
     @Property
@@ -42,11 +42,11 @@ public class User {
         this.name = name;
     }
 
-    public LocalDate getDateOfBirth() {
+    public String getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDate dateOfBirth){
+    public void setDateOfBirth(String dateOfBirth){
         this.dateOfBirth = dateOfBirth;
     }
 
