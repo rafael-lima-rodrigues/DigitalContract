@@ -3,6 +3,7 @@
  */
 package org.example;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
@@ -24,9 +25,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
                                                 url = "http://Tcc.me")))
 @Default
 public class UserIdentityContract implements ContractInterface {
-    public UserIdentityContract() {
+    public UserIdentityContract() {}
 
-    }
+    /**
+     * O metodo returna true se userSignId passado como parametro existe
+     * e false caso nao exista
+     * @param ctx
+     * @param userSignId
+     * @return
+     */
     @Transaction()
     public boolean userIdentityExists(Context ctx, String userSignId) {
         byte[] buffer = ctx.getStub().getState(userSignId);
@@ -50,9 +57,19 @@ public class UserIdentityContract implements ContractInterface {
             throw new RuntimeException("The asset "+userSignId+" already exists");
         }
         User user = User.fromJSONString(userData);
-        ctx.getStub().putStringState(userSignId, user.toJSONString());
+        ctx.getStub().putState(userSignId, user.toJSONString().getBytes(UTF_8));
+
+       // ctx.getStub().putStringState(userSignId, user.toJSONString());
     }
 
+    /**
+     * O metedo returna uma identidade de usuario a partir de uma key id
+     *
+     * @param ctx
+     * @param userId
+     * @return User
+     * @throws IOException
+     */
 
     @Transaction()
     public User readUserIdentity(Context ctx, String userId) throws IOException {
@@ -60,20 +77,19 @@ public class UserIdentityContract implements ContractInterface {
         if (!exists) {
             throw new RuntimeException("The asset "+ userId +" does not exist");
         }
-        User user = User.fromJSONString(new String(ctx.getStub().getStringState(userId)));
+        //User user = User.fromJSONString(new String(ctx.getStub().getStringState(userId));
+        User user = User.fromJSONString(new String(ctx.getStub().getState(userId),UTF_8));
         return user;
     }
 
     @Transaction()
-    public void updateUserIdentity(Context ctx, String digitalSignId, String newValue) {
-        boolean exists = userIdentityExists(ctx,digitalSignId);
+    public void updateUserIdentity(Context ctx, String userSignId, String newValue) throws IOException {
+        boolean exists = userIdentityExists(ctx,userSignId);
         if (!exists) {
-            throw new RuntimeException("The asset "+digitalSignId+" does not exist");
+            throw new RuntimeException("The asset " + userSignId + " does not exist");
         }
-        DigitalSign asset = new DigitalSign();
-        asset.setValue(newValue);
-
-        ctx.getStub().putState(digitalSignId, asset.toJSONString().getBytes(UTF_8));
+        User user = User.fromJSONString(newValue);
+        ctx.getStub().putState(userSignId, user.toJSONString().getBytes(UTF_8));
     }
 
     @Transaction()
