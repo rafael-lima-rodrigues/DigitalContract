@@ -75,22 +75,15 @@ public class User {
 
     public String toJSONString() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException ex){
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+        return mapper.writeValueAsString(this);
+
     }
 
     public static User fromJSONString(String json) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         User user = null;
-        try {
-            user = mapper.readValue(json, User.class);
-        }catch (JsonProcessingException ex){
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null,ex);
-        }
+        user = mapper.readValue(json, User.class);
+
         return user;
     }
 }

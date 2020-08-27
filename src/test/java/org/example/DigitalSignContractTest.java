@@ -158,6 +158,8 @@ public final class DigitalSignContractTest {
             });
 
             assertEquals(thrown.getMessage(), "The asset 10001 does not exist");
+
+
         }
 
     }

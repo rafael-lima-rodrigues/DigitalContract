@@ -57,9 +57,9 @@ public class UserIdentityContract implements ContractInterface {
             throw new RuntimeException("The asset "+userSignId+" already exists");
         }
         User user = User.fromJSONString(userData);
-        ctx.getStub().putState(userSignId, user.toJSONString().getBytes(UTF_8));
+       // ctx.getStub().putState(userSignId, user.toJSONString().getBytes(UTF_8));
 
-       // ctx.getStub().putStringState(userSignId, user.toJSONString());
+        ctx.getStub().putStringState(userSignId, user.toJSONString());
     }
 
     /**
@@ -89,6 +89,7 @@ public class UserIdentityContract implements ContractInterface {
             throw new RuntimeException("The asset " + userSignId + " does not exist");
         }
         User user = User.fromJSONString(newValue);
+
         ctx.getStub().putState(userSignId, user.toJSONString().getBytes(UTF_8));
     }
 
