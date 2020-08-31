@@ -3,8 +3,6 @@
  */
 package org.example;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.*;
@@ -13,7 +11,7 @@ import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@Contract(name = "UserIdentityContract",
+@org.hyperledger.fabric.contract.annotation.Contract(name = "UserIdentityContract",
     info = @Info(title = "UserIdentity contract",
                 description = "My Smart Contract2",
                 version = "0.0.1",
@@ -56,30 +54,30 @@ public class UserIdentityContract implements ContractInterface {
         if (exists) {
             throw new RuntimeException("The asset "+userSignId+" already exists");
         }
-        User user = User.fromJSONString(userData);
-       // ctx.getStub().putState(userSignId, user.toJSONString().getBytes(UTF_8));
+        UserIdentity userIdentity = UserIdentity.fromJSONString(userData);
+       // ctx.getStub().putState(userSignId, userIdentity.toJSONString().getBytes(UTF_8));
 
-        ctx.getStub().putStringState(userSignId, user.toJSONString());
+        ctx.getStub().putStringState(userSignId, userIdentity.toJSONString());
     }
 
     /**
-     * O metedo returna uma identidade de usuario a partir de uma key id
+     * O metodo returna uma identidade de usuario a partir de uma key id
      *
      * @param ctx
      * @param userId
-     * @return User
+     * @return UserIdentity
      * @throws IOException
      */
 
     @Transaction()
-    public User readUserIdentity(Context ctx, String userId) throws IOException {
+    public UserIdentity readUserIdentity(Context ctx, String userId) throws IOException {
         boolean exists = userIdentityExists(ctx,userId);
         if (!exists) {
             throw new RuntimeException("The asset "+ userId +" does not exist");
         }
-        //User user = User.fromJSONString(new String(ctx.getStub().getStringState(userId));
-        User user = User.fromJSONString(new String(ctx.getStub().getState(userId),UTF_8));
-        return user;
+        //UserIdentity userIdentity = UserIdentity.fromJSONString(new String(ctx.getStub().getStringState(userId));
+        UserIdentity userIdentity = UserIdentity.fromJSONString(new String(ctx.getStub().getState(userId),UTF_8));
+        return userIdentity;
     }
 
     @Transaction()
@@ -88,9 +86,9 @@ public class UserIdentityContract implements ContractInterface {
         if (!exists) {
             throw new RuntimeException("The asset " + userSignId + " does not exist");
         }
-        User user = User.fromJSONString(newValue);
+        UserIdentity userIdentity = UserIdentity.fromJSONString(newValue);
 
-        ctx.getStub().putState(userSignId, user.toJSONString().getBytes(UTF_8));
+        ctx.getStub().putState(userSignId, userIdentity.toJSONString().getBytes(UTF_8));
     }
 
     @Transaction()

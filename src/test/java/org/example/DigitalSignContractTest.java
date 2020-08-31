@@ -12,7 +12,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.Gson;
 import org.hyperledger.fabric.contract.Context;
@@ -74,17 +77,26 @@ public final class DigitalSignContractTest {
     class AssetCreates {
 
         @Test
-        public void newAssetCreate() {
+        public void newAssetCreate() throws IOException {
             DigitalSignContract contract = new  DigitalSignContract();
             Context ctx = mock(Context.class);
             ChaincodeStub stub = mock(ChaincodeStub.class);
             when(ctx.getStub()).thenReturn(stub);
 
-            String json = "{\"value\":\"{id:001, dados:teste, userIdOwner:100}\"}";
+            DocumentsSigned documentsSigned = new DocumentsSigned();
+            documentsSigned.setId("100");
+            documentsSigned.setUserIdOwner("1234");
+            documentsSigned.setDados("hello world");
+                List<String> lista = new ArrayList<>();
+            lista.add("user1"); lista.add("user2"); lista.add("user3");
+            documentsSigned.setListUserMembers(lista);
 
-            contract.createDigitalSign(ctx, "10001", "{id:001, dados:teste, userIdOwner:100}");
+            contract.createDigitalSign(ctx, "10001",
+                    "{\"id\":100,\"dados\":\"hello world\"," +
+                            "\"userIdOwner\":\"1234\"," +
+                            "\"listUserMembers\":[\"user1\",\"user2\",\"user3\"]}");
 
-            verify(stub).putState("10001", json.getBytes(UTF_8));
+            verify(stub).putState("10001", documentsSigned.toJSONString().getBytes(UTF_8));
         }
 
         @Test
@@ -107,24 +119,25 @@ public final class DigitalSignContractTest {
     }
 
     @Test
-    public void assetRead() {
+    public void assetRead() throws IOException {
         DigitalSignContract contract = new  DigitalSignContract();
         Context ctx = mock(Context.class);
         ChaincodeStub stub = mock(ChaincodeStub.class);
         when(ctx.getStub()).thenReturn(stub);
 
-        DigitalSign asset = new  DigitalSign();
-        asset.setValue("{id:001, dados:teste, userIdOwner:100}");
-        //Gson gson = new Gson();
-        //Contrato contrato = new Contrato();
-        //contrato = gson.fromJson(asset.getValue(), Contrato.class);
-        //System.out.println(contrato.getDados());
+        DocumentsSigned documentsSigned = new DocumentsSigned();
+        documentsSigned.setId("100");
+        documentsSigned.setUserIdOwner("user1");
+        documentsSigned.setDados("hello world");
+        List<String> lista = new ArrayList<>();
+        lista.add("user1"); lista.add("user2"); lista.add("user3");
+        documentsSigned.setListUserMembers(lista);
 
-        String json = asset.toJSONString();
+        String json = documentsSigned.toJSONString();
         when(stub.getState("10001")).thenReturn(json.getBytes(StandardCharsets.UTF_8));
 
-        String returnedAsset = contract.readDigitalSign(ctx, "10001", "100").toJSONString();
-        assertEquals(returnedAsset, "{\"value\":\"{id:001, dados:teste, userIdOwner:100}\"}");
+        String returnedAsset = contract.readDigitalSign(ctx, "10001", "user1").toJSONString();
+        assertEquals(returnedAsset, documentsSigned.toJSONString());
         System.out.println("Leitura do contrato: "+ returnedAsset);
     }
 
@@ -138,10 +151,21 @@ public final class DigitalSignContractTest {
             when(ctx.getStub()).thenReturn(stub);
             when(stub.getState("10001")).thenReturn(new byte[] { 42 });
 
-            contract.updateDigitalSign(ctx, "10001", "updates");
+            DocumentsSigned documentsSigned = new DocumentsSigned();
+            documentsSigned.setId("100");
+            documentsSigned.setUserIdOwner("user1");
+            documentsSigned.setDados("hello world");
+            List<String> lista = new ArrayList<>();
+            lista.add("user1"); lista.add("user2"); lista.add("user3");
+            documentsSigned.setListUserMembers(lista);
 
-            String json = "{\"value\":\"updates\"}";
-            verify(stub).putState("10001", json.getBytes(UTF_8));
+            try {
+                contract.updateDigitalSign(ctx,"10001", "11100", documentsSigned.toJSONString());
+                String json = documentsSigned.toJSONString();
+                verify(stub).putState("10001", json.getBytes(UTF_8));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Test
@@ -151,17 +175,21 @@ public final class DigitalSignContractTest {
             ChaincodeStub stub = mock(ChaincodeStub.class);
             when(ctx.getStub()).thenReturn(stub);
 
+            DocumentsSigned documentsSigned = new DocumentsSigned();
+            documentsSigned.setId("100");
+            documentsSigned.setUserIdOwner("user1");
+            documentsSigned.setDados("hello world");
+            List<String> lista = new ArrayList<>();
+            lista.add("user1"); lista.add("user2"); lista.add("user3");
+            documentsSigned.setListUserMembers(lista);
+
             when(stub.getState("10001")).thenReturn(null);
 
             Exception thrown = assertThrows(RuntimeException.class, () -> {
-                contract.updateDigitalSign(ctx, "10001", "TheDigitalSign");
+                contract.updateDigitalSign(ctx, "10001", "100", documentsSigned.toJSONString());
             });
-
             assertEquals(thrown.getMessage(), "The asset 10001 does not exist");
-
-
         }
-
     }
 
     @Test
@@ -173,7 +201,7 @@ public final class DigitalSignContractTest {
         when(stub.getState("10001")).thenReturn(null);
 
         Exception thrown = assertThrows(RuntimeException.class, () -> {
-            contract.deleteDigitalSign(ctx, "10001");
+            contract.deleteDigitalSign(ctx,"100", "10001");
         });
 
         assertEquals(thrown.getMessage(), "The asset 10001 does not exist");
