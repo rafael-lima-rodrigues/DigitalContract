@@ -12,6 +12,7 @@ import org.hyperledger.fabric.contract.annotation.Info;
 import org.hyperledger.fabric.contract.annotation.License;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.example.DocumentsSigned.verifyIsOwner;
@@ -45,7 +46,14 @@ public class DigitalSignContract implements ContractInterface {
         if (exists) {
             throw new RuntimeException("The asset "+digitalSignId+" already exists");
         }
+        UserIdentityContract idContract = new UserIdentityContract();
+
         DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(documents);
+
+        boolean userExists = idContract.userIdentityExists(ctx,documentsSigned.getUserIdOwner());
+        if (!userExists){
+            throw new RemoteException("User: " + documentsSigned.getUserIdOwner() + " doesn't exists");
+        }
         ctx.getStub().putState(digitalSignId,documentsSigned.toJSONString().getBytes());
     }
 
