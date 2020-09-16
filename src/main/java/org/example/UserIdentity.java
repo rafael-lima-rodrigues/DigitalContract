@@ -8,6 +8,9 @@ import java.io.IOException;
 
 @DataType
 public class UserIdentity {
+
+    @Property
+    private String id;
     @Property
     private String name;
     @Property
@@ -19,6 +22,14 @@ public class UserIdentity {
     @Property
     private String civilState;
 
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -32,13 +43,14 @@ public class UserIdentity {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(String dateOfBirth){
+    public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
-    public void setCpf(String cpf){
+    public void setCpf(String cpf) {
         this.cpf = cpf;
     }
+
     public String getCpf() {
         return cpf;
     }
