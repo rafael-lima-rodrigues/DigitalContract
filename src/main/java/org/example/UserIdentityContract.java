@@ -5,19 +5,23 @@ package org.example;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.*;
+import org.hyperledger.fabric.shim.Chaincode;
+import org.hyperledger.fabric.shim.ledger.KeyModification;
 import org.hyperledger.fabric.shim.ledger.KeyValue;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hyperledger.fabric.shim.ResponseUtils.newSuccessResponse;
 
 @org.hyperledger.fabric.contract.annotation.Contract(name = "UserIdentityContract",
         info = @Info(title = "UserIdentity contract",
@@ -131,5 +135,32 @@ public class UserIdentityContract implements ContractInterface {
 
     }
 
+    @Transaction
+    public String getUserHistory(Context context, String key) {
+        String payload = "";
+        List<Map<String, Object>> historylist = new ArrayList<>();
 
+        Iterator<KeyModification> iterator = context.getStub().getHistoryForKey(key).iterator();
+        if (!iterator.hasNext()) {
+            return "[]";
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModules(new JavaTimeModule());
+        while (iterator.hasNext()) {
+            HashMap<String, Object> history = new HashMap<>();
+            KeyModification modification = iterator.next();
+            history.put("asset", modification.getStringValue());
+            history.put("transactionId", modification.getTxId());
+            history.put("timeStamp", modification.getTimestamp());
+            historylist.add(history);
+        }
+        try {
+            payload = objectMapper.writeValueAsString(historylist);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(UserIdentityContract.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        Chaincode.Response response = newSuccessResponse("Query Sucessful", payload.getBytes(UTF_8));
+        return response.getStringPayload();
+    }
 }
