@@ -153,6 +153,7 @@ public class UserIdentityContract implements ContractInterface {
             history.put("transactionId", modification.getTxId());
             history.put("timeStamp", modification.getTimestamp());
             historylist.add(history);
+
         }
         try {
             payload = objectMapper.writeValueAsString(historylist);
