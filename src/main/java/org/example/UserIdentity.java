@@ -18,10 +18,9 @@ public class UserIdentity {
     @Property
     private String cpf;
     @Property
-    private String sex;
-    @Property
     private String civilState;
-
+    @Property
+    private final String typeDoc = "usersDoc";
 
     public String getId() {
         return id;
@@ -55,13 +54,9 @@ public class UserIdentity {
         return cpf;
     }
 
-    public String getSex() {
-        return sex;
-    }
-
-    public void setSex(String sex) {
-        this.sex = sex;
-    }
+    //public void setSex(String sex) {
+      //  this.sex = sex;
+   // }
 
     public String getCivilState() {
         return civilState;
@@ -70,6 +65,11 @@ public class UserIdentity {
     public void setCivilState(String civilState) {
         this.civilState = civilState;
     }
+
+    public String getTypeDoc() {
+        return typeDoc;
+    }
+
 
     public String toJSONString() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
