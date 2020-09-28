@@ -118,7 +118,7 @@ public class UserIdentityContract implements ContractInterface {
     }
 
     @Transaction
-    public String query(Context context, String query) throws IOException {
+    public String queryUserID(Context context, String query) throws IOException {
         List<UserIdentity> userList = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -202,8 +202,8 @@ public class UserIdentityContract implements ContractInterface {
         DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
                 new String(ctx.getStub().getState(digitalSignId),UTF_8));
 
-        boolean userPermission = verifyMemberId(userId, documentsSigned.getListUserMembers());
-        if(!userPermission){
+       // boolean userPermission = verifyMemberId(userId, documentsSigned.getListUserMembers());
+        if(!documentsSigned.getListUserMembers().contains(userId)){
             throw new RuntimeException("The user " + userId + "has not permission");
         }
 
@@ -219,8 +219,8 @@ public class UserIdentityContract implements ContractInterface {
         DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
                 new String(ctx.getStub().getState(digitalSignId),UTF_8));
 
-        boolean userPermission = verifyMemberId(userId, documentsSigned.getListUserMembers());
-        if(!userPermission){
+       // boolean userPermission = verifyMemberId(userId, documentsSigned.getListUserMembers());
+        if(!documentsSigned.getUserIdOwner().equals(userId)){
             throw new RuntimeException("The user " + userId + "has not permission");
         }else {
             DocumentsSigned documentToUpdate = DocumentsSigned.fromJSONString(newDocument);
@@ -237,10 +237,61 @@ public class UserIdentityContract implements ContractInterface {
         DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
                 new String(ctx.getStub().getState(digitalSignId),UTF_8));
 
-        boolean userPermission = verifyIsOwner(userId,documentsSigned.getUserIdOwner());
-        if(!userPermission){
+       // boolean userPermission = verifyIsOwner(userId,documentsSigned.getUserIdOwner());
+        if(!documentsSigned.getUserIdOwner().equals(userId)){
             throw new RuntimeException("The user " + userId + "has not permission");
         }
         ctx.getStub().delState(digitalSignId);
+    }
+    @Transaction
+    public String queryDS(Context context, String query, String userId) throws IOException {
+        List<DocumentsSigned> userList = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Iterator<KeyValue> interator = context.getStub().getQueryResult(query).iterator();
+        while (interator.hasNext()) {
+
+            String key = interator.next().getKey();
+            DocumentsSigned documentsSigned = null;
+            documentsSigned = readDigitalSign(context, key, userId);
+            userList.add(documentsSigned);
+        }
+        try {
+            return objectMapper.writeValueAsString(userList);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(UserIdentity.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "[]";
+
+    }
+
+    @Transaction
+    public String getDSHistory(Context context, String key) {
+        String payload = "";
+        List<Map<String, Object>> historylist = new ArrayList<>();
+
+        Iterator<KeyModification> iterator = context.getStub().getHistoryForKey(key).iterator();
+        if (!iterator.hasNext()) {
+            return "[]";
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModules(new JavaTimeModule());
+        while (iterator.hasNext()) {
+            HashMap<String, Object> history = new HashMap<>();
+            KeyModification modification = iterator.next();
+            history.put("asset", modification.getStringValue());
+            history.put("transactionId", modification.getTxId());
+            history.put("timeStamp", modification.getTimestamp());
+            historylist.add(history);
+
+        }
+        try {
+            payload = objectMapper.writeValueAsString(historylist);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(UserIdentityContract.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        Chaincode.Response response = newSuccessResponse("Query Sucessful", payload.getBytes(UTF_8));
+        return response.getStringPayload();
     }
 }
