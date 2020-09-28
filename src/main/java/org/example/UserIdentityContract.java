@@ -17,11 +17,14 @@ import org.hyperledger.fabric.shim.ledger.KeyValue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.example.DocumentsSigned.verifyIsOwner;
+import static org.example.DocumentsSigned.verifyMemberId;
 import static org.hyperledger.fabric.shim.ResponseUtils.newSuccessResponse;
 
 @org.hyperledger.fabric.contract.annotation.Contract(name = "UserIdentityContract",
@@ -164,5 +167,80 @@ public class UserIdentityContract implements ContractInterface {
 
         Chaincode.Response response = newSuccessResponse("Query Sucessful", payload.getBytes(UTF_8));
         return response.getStringPayload();
+    }
+
+    @Transaction()
+    public boolean digitalSignExists(Context ctx, String digitalSignId) {
+        byte[] buffer = ctx.getStub().getState(digitalSignId);
+        return (buffer != null && buffer.length > 0);
+    }
+
+    @Transaction()
+    public void createDigitalSign(Context ctx, String digitalSignId, String documents) throws IOException {
+        boolean exists = digitalSignExists(ctx,digitalSignId);
+        if (exists) {
+            throw new RuntimeException("The asset "+digitalSignId+" already exists");
+        }
+        UserIdentityContract idContract = new UserIdentityContract();
+
+        DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(documents);
+
+        boolean userExists = idContract.userIdentityExists(ctx,documentsSigned.getUserIdOwner());
+        if (!userExists){
+            throw new RemoteException("User: " + documentsSigned.getUserIdOwner() + " doesn't exists");
+        }
+        ctx.getStub().putState(digitalSignId,documentsSigned.toJSONString().getBytes());
+    }
+
+    @Transaction()
+    public DocumentsSigned readDigitalSign(Context ctx, String digitalSignId, String userId) throws IOException {
+        boolean exists = digitalSignExists(ctx,digitalSignId);
+        if (!exists) {
+            throw new RuntimeException("The asset "+digitalSignId+" does not exist");
+        }
+
+        DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
+                new String(ctx.getStub().getState(digitalSignId),UTF_8));
+
+        boolean userPermission = verifyMemberId(userId, documentsSigned.getListUserMembers());
+        if(!userPermission){
+            throw new RuntimeException("The user " + userId + "has not permission");
+        }
+
+        return documentsSigned;
+    }
+
+    @Transaction()
+    public void updateDigitalSign(Context ctx, String digitalSignId, String userId, String newDocument) throws IOException {
+        boolean exists = digitalSignExists(ctx,digitalSignId);
+        if (!exists) {
+            throw new RuntimeException("The asset "+digitalSignId+" does not exist");
+        }
+        DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
+                new String(ctx.getStub().getState(digitalSignId),UTF_8));
+
+        boolean userPermission = verifyMemberId(userId, documentsSigned.getListUserMembers());
+        if(!userPermission){
+            throw new RuntimeException("The user " + userId + "has not permission");
+        }else {
+            DocumentsSigned documentToUpdate = DocumentsSigned.fromJSONString(newDocument);
+            ctx.getStub().putState(digitalSignId, documentToUpdate.toJSONString().getBytes(UTF_8));
+        }
+    }
+
+    @Transaction()
+    public void deleteDigitalSign(Context ctx, String userId, String digitalSignId) throws IOException {
+        boolean exists = digitalSignExists(ctx,digitalSignId);
+        if (!exists) {
+            throw new RuntimeException("The asset "+digitalSignId+" does not exist");
+        }
+        DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
+                new String(ctx.getStub().getState(digitalSignId),UTF_8));
+
+        boolean userPermission = verifyIsOwner(userId,documentsSigned.getUserIdOwner());
+        if(!userPermission){
+            throw new RuntimeException("The user " + userId + "has not permission");
+        }
+        ctx.getStub().delState(digitalSignId);
     }
 }
