@@ -5,29 +5,24 @@ package org.example;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.*;
 import org.hyperledger.fabric.shim.Chaincode;
-import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.hyperledger.fabric.shim.ledger.KeyModification;
 import org.hyperledger.fabric.shim.ledger.KeyValue;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.example.DocumentsSigned.verifyIsOwner;
-import static org.example.DocumentsSigned.verifyMemberId;
 import static org.hyperledger.fabric.shim.ResponseUtils.newSuccessResponse;
 
-@org.hyperledger.fabric.contract.annotation.Contract(name = "UserIdentityContract",
+@org.hyperledger.fabric.contract.annotation.Contract(name = "DocumentsContract",
         info = @Info(title = "UserIdentity contract",
                 description = "My Smart Contract2",
                 version = "0.0.1",
@@ -38,8 +33,8 @@ import static org.hyperledger.fabric.shim.ResponseUtils.newSuccessResponse;
                         name = "Tcc",
                         url = "http://Tcc.me")))
 @Default
-public class UserIdentityContract implements ContractInterface {
-    public UserIdentityContract() {
+public class DocumentsContract implements ContractInterface {
+    public DocumentsContract() {
     }
 
     /**
@@ -72,7 +67,7 @@ public class UserIdentityContract implements ContractInterface {
             throw new RuntimeException("The asset " + userSignId + " already exists");
         }
         UserIdentity userIdentity = UserIdentity.fromJSONString(userData);
-        // ctx.getStub().putState(userSignId, userIdentity.toJSONString().getBytes(UTF_8));
+
 
         ctx.getStub().putStringState(userSignId, userIdentity.toJSONString());
     }
@@ -92,7 +87,6 @@ public class UserIdentityContract implements ContractInterface {
         if (!exists) {
             throw new RuntimeException("The asset " + userId + " does not exist");
         }
-        //UserIdentity userIdentity = UserIdentity.fromJSONString(new String(ctx.getStub().getStringState(userId));
         UserIdentity userIdentity = UserIdentity.fromJSONString(new String(ctx.getStub().getState(userId), UTF_8));
         return userIdentity;
     }
@@ -162,7 +156,7 @@ public class UserIdentityContract implements ContractInterface {
         try {
             payload = objectMapper.writeValueAsString(historylist);
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(UserIdentityContract.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DocumentsContract.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         Chaincode.Response response = newSuccessResponse("Query Sucessful", payload.getBytes(UTF_8));
@@ -181,7 +175,7 @@ public class UserIdentityContract implements ContractInterface {
         if (exists) {
             throw new RuntimeException("The asset "+digitalSignId+" already exists");
         }
-        UserIdentityContract idContract = new UserIdentityContract();
+        DocumentsContract idContract = new DocumentsContract();
 
         DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(documents);
 
@@ -202,7 +196,7 @@ public class UserIdentityContract implements ContractInterface {
         DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
                 new String(ctx.getStub().getState(digitalSignId),UTF_8));
 
-       // boolean userPermission = verifyMemberId(userId, documentsSigned.getListUserMembers());
+
         if(!documentsSigned.getListUserMembers().contains(userId)){
             throw new RuntimeException("The user " + userId + "has not permission");
         }
@@ -219,7 +213,7 @@ public class UserIdentityContract implements ContractInterface {
         DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
                 new String(ctx.getStub().getState(digitalSignId),UTF_8));
 
-       // boolean userPermission = verifyMemberId(userId, documentsSigned.getListUserMembers());
+
         if(!documentsSigned.getUserIdOwner().equals(userId)){
             throw new RuntimeException("The user " + userId + "has not permission");
         }else {
@@ -237,7 +231,7 @@ public class UserIdentityContract implements ContractInterface {
         DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
                 new String(ctx.getStub().getState(digitalSignId),UTF_8));
 
-       // boolean userPermission = verifyIsOwner(userId,documentsSigned.getUserIdOwner());
+
         if(!documentsSigned.getUserIdOwner().equals(userId)){
             throw new RuntimeException("The user " + userId + "has not permission");
         }
@@ -288,7 +282,7 @@ public class UserIdentityContract implements ContractInterface {
         try {
             payload = objectMapper.writeValueAsString(historylist);
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(UserIdentityContract.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DocumentsContract.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         Chaincode.Response response = newSuccessResponse("Query Sucessful", payload.getBytes(UTF_8));

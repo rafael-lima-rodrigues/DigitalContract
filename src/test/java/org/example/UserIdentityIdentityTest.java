@@ -21,7 +21,7 @@ public final class UserIdentityIdentityTest {
     public class CreateUserIdentity {
         @Test
         public void newUserIdentity(){
-            UserIdentityContract contract = new UserIdentityContract();
+            DocumentsContract contract = new DocumentsContract();
             Context context = mock(Context.class);
             ChaincodeStub stub = mock(ChaincodeStub.class);
             when(context.getStub()).thenReturn(stub);
@@ -29,9 +29,7 @@ public final class UserIdentityIdentityTest {
             UserIdentity userIdentity = new UserIdentity();
             userIdentity.setName("rafael");
             userIdentity.setCpf("123456");
-            userIdentity.setCivilState("solteiro");
-            userIdentity.setSex("M");
-            userIdentity.setDateOfBirth("25-02-1991");
+            userIdentity.setPassword("solteiro");
 
             String json = null;
             try {
@@ -51,17 +49,16 @@ public final class UserIdentityIdentityTest {
 
         @Test
         public void readUserIdentity(){
-            UserIdentityContract contract = new UserIdentityContract();
+            DocumentsContract contract = new DocumentsContract();
             Context context = mock(Context.class);
             ChaincodeStub stub = mock(ChaincodeStub.class);
             when(context.getStub()).thenReturn(stub);
 
             UserIdentity userIdentity = new UserIdentity();
             userIdentity.setName("rafael");
-            userIdentity.setCpf("123456");
-            userIdentity.setCivilState("solteiro");
-            userIdentity.setSex("M");
-            userIdentity.setDateOfBirth("25-02-1991");
+            userIdentity.setPassword("123456");
+            userIdentity.setCpf("12313213");
+
 
             String json = null;
             String key = "10001";
@@ -89,7 +86,7 @@ public final class UserIdentityIdentityTest {
         @Test
         public void updateExisting(){
 
-            UserIdentityContract contract = new UserIdentityContract();
+            DocumentsContract contract = new DocumentsContract();
             Context context = mock(Context.class);
             ChaincodeStub stub = mock(ChaincodeStub.class);
             when(context.getStub()).thenReturn(stub);
@@ -98,9 +95,8 @@ public final class UserIdentityIdentityTest {
             UserIdentity userIdentity = new UserIdentity();
             userIdentity.setName("rafael");
             userIdentity.setCpf("123456");
-            userIdentity.setCivilState("casado");
-            userIdentity.setSex("M");
-            userIdentity.setDateOfBirth("25-02-1991");
+            userIdentity.setPassword("casado");
+
 
             String json = null;
             try {
@@ -120,7 +116,7 @@ public final class UserIdentityIdentityTest {
 
         @Test
         public void updateMissing() {
-            UserIdentityContract contract = new UserIdentityContract();
+            DocumentsContract contract = new DocumentsContract();
             Context ctx = mock(Context.class);
             ChaincodeStub stub = mock(ChaincodeStub.class);
             when(ctx.getStub()).thenReturn(stub);
@@ -136,7 +132,7 @@ public final class UserIdentityIdentityTest {
 
         @Test
         public void assetDelete() {
-            UserIdentityContract contract = new UserIdentityContract();
+            DocumentsContract contract = new DocumentsContract();
             Context ctx = mock(Context.class);
             ChaincodeStub stub = mock(ChaincodeStub.class);
             when(ctx.getStub()).thenReturn(stub);

@@ -14,11 +14,9 @@ public class UserIdentity {
     @Property
     private String name;
     @Property
-    private String dateOfBirth;
+    private String password;
     @Property
     private String cpf;
-    @Property
-    private String civilState;
     @Property
     private final String typeDoc = "usersDoc";
 
@@ -38,12 +36,12 @@ public class UserIdentity {
         this.name = name;
     }
 
-    public String getDateOfBirth() {
-        return dateOfBirth;
+    public String getPassword() {
+        return password;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setCpf(String cpf) {
@@ -52,18 +50,6 @@ public class UserIdentity {
 
     public String getCpf() {
         return cpf;
-    }
-
-    //public void setSex(String sex) {
-      //  this.sex = sex;
-   // }
-
-    public String getCivilState() {
-        return civilState;
-    }
-
-    public void setCivilState(String civilState) {
-        this.civilState = civilState;
     }
 
     public String getTypeDoc() {

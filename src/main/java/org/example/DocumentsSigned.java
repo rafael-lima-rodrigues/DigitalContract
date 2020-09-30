@@ -12,12 +12,13 @@ import java.util.List;
 @DataType
 public class DocumentsSigned {
     @Property
-    private  String id;
+    private String id;
     @Property
     private String dados;
     @Property
-    private  String userIdOwner;
-
+    private String userIdOwner;
+    @Property
+    private final String typeDoc = "DocsCreated";
     @Property
     private List<String> listUserMembers = new ArrayList<>();
 
@@ -56,6 +57,10 @@ public class DocumentsSigned {
         this.userIdOwner = userIdOwner;
     }
 
+    public String getTypeDoc() {
+        return typeDoc;
+    }
+
     public String toJSONString() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(this);
@@ -72,7 +77,7 @@ public class DocumentsSigned {
 
     public static boolean verifyMemberId(String memberId, List memberslist) {
         //DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(value);
-        if (memberslist.contains(memberId)){
+        if (memberslist.contains(memberId)) {
             return true;
         }
         return false;
@@ -80,7 +85,7 @@ public class DocumentsSigned {
 
     public static boolean verifyIsOwner(String memberId, String ownerId) {
         //DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(value);
-        if (ownerId.equals(memberId)){
+        if (ownerId.equals(memberId)) {
             return true;
         }
         return false;
