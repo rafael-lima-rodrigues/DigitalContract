@@ -7,12 +7,16 @@ import org.hyperledger.fabric.contract.annotation.Property;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @DataType
 public class DocumentsSigned {
     @Property
     private String id;
+    @Property
+    private String descricao;
     @Property
     private String dados;
     @Property
@@ -20,7 +24,7 @@ public class DocumentsSigned {
     @Property
     private final String typeDoc = "DocsCreated";
     @Property
-    private List<String> listUserMembers = new ArrayList<>();
+    private Map<String, Boolean> sign = new HashMap<>();
 
     public DocumentsSigned() {
     }
@@ -29,16 +33,16 @@ public class DocumentsSigned {
         this.id = id;
     }
 
-    public List<String> getListUserMembers() {
-        return listUserMembers;
-    }
-
-    public void setListUserMembers(List<String> listUserMembers) {
-        this.listUserMembers = listUserMembers;
-    }
-
     public String getId() {
         return id;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
     public String getDados() {
@@ -59,6 +63,14 @@ public class DocumentsSigned {
 
     public String getTypeDoc() {
         return typeDoc;
+    }
+
+    public Map<String, Boolean> getSign() {
+        return sign;
+    }
+
+    public void setSign(Map<String, Boolean> sign) {
+        this.sign = sign;
     }
 
     public String toJSONString() throws IOException {
