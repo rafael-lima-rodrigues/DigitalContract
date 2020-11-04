@@ -9,15 +9,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.*;
-import org.hyperledger.fabric.protos.common.Common;
-import org.hyperledger.fabric.protos.peer.ProposalResponsePackage;
-import org.hyperledger.fabric.protos.peer.TransactionPackage;
 import org.hyperledger.fabric.shim.Chaincode;
 import org.hyperledger.fabric.shim.ledger.KeyModification;
 import org.hyperledger.fabric.shim.ledger.KeyValue;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +23,7 @@ import static org.hyperledger.fabric.shim.ResponseUtils.newSuccessResponse;
 
 @org.hyperledger.fabric.contract.annotation.Contract(name = "DocumentsContract",
         info = @Info(title = "UserIdentity contract",
-                description = "My Smart Contract2",
+                description = "My Smart Contract",
                 version = "0.0.1",
                 license =
                 @License(name = "Apache-2.0",
@@ -40,9 +36,6 @@ public class DocumentsContract implements ContractInterface {
     public DocumentsContract() {
     }
 
-
-
-
     @Transaction()
     public boolean digitalSignExists(Context ctx, String digitalSignId) {
         byte[] buffer = ctx.getStub().getState(digitalSignId);
@@ -50,63 +43,55 @@ public class DocumentsContract implements ContractInterface {
     }
 
     @Transaction()
-    public void createDigitalSign(Context ctx, String digitalSignId, String documents) throws IOException {
-        boolean exists = digitalSignExists(ctx,digitalSignId);
+    public void createDigitalDoc(Context ctx, String digitalDocId, String digitalDocArgs) throws IOException {
+        boolean exists = digitalSignExists(ctx, digitalDocId);
         if (exists) {
-            throw new RuntimeException("The asset "+digitalSignId+" already exists");
+            throw new RuntimeException("The asset " + digitalDocId + " already exists");
         }
-        DocumentsContract idContract = new DocumentsContract();
 
-        DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(documents);
-
-        ctx.getStub().putState(digitalSignId,documentsSigned.toJSONString().getBytes());
+        DigitalDocument digitalDocument = DigitalDocument.fromJSONString(digitalDocArgs);
+        ctx.getStub().putState(digitalDocId, digitalDocument.toJSONString().getBytes());
     }
 
     @Transaction()
-    public DocumentsSigned readDigitalSign(Context ctx, String digitalSignId) throws IOException {
-        boolean exists = digitalSignExists(ctx,digitalSignId);
+    public DigitalDocument findDigitalDocById(Context ctx, String digitalDocId) throws IOException {
+        boolean exists = digitalSignExists(ctx, digitalDocId);
         if (!exists) {
-            throw new RuntimeException("The asset "+digitalSignId+" does not exist");
+            throw new RuntimeException("The asset " + digitalDocId + " does not exist");
         }
 
-        DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
-                new String(ctx.getStub().getState(digitalSignId),UTF_8));
+        DigitalDocument digitalDocument = DigitalDocument.fromJSONString(
+                new String(ctx.getStub().getState(digitalDocId), UTF_8));
 
-        return documentsSigned;
+        return digitalDocument;
     }
 
     @Transaction()
-    public void updateDigitalSign(Context ctx, String digitalSignId, String newDocument) throws IOException {
-        boolean exists = digitalSignExists(ctx,digitalSignId);
+    public void updateDigitalDoc(Context ctx, String digitalDocId, String digitalDocArgs) throws IOException {
+        boolean exists = digitalSignExists(ctx, digitalDocId);
+
         if (!exists) {
-            throw new RuntimeException("The asset "+digitalSignId+" does not exist");
+            throw new RuntimeException("The asset " + digitalDocId + " does not exist");
         }
-        DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
-                new String(ctx.getStub().getState(digitalSignId),UTF_8));
 
+        DigitalDocument _digitalDocArgs = DigitalDocument.fromJSONString(digitalDocArgs);
+        ctx.getStub().putState(digitalDocId, _digitalDocArgs.toJSONString().getBytes(UTF_8));
 
-       // if(!documentsSigned.getListUserMembers().containsKey(memberId)){
-           // throw new RuntimeException("The user " + memberId + "is not a member");
-      //  }else {
-            DocumentsSigned documentToUpdate = DocumentsSigned.fromJSONString(newDocument);
-            ctx.getStub().putState(digitalSignId, documentToUpdate.toJSONString().getBytes(UTF_8));
-       // }
     }
 
     @Transaction()
-    public void deleteDigitalSign(Context ctx, String digitalSignId) throws IOException {
-        boolean exists = digitalSignExists(ctx,digitalSignId);
+    public void deleteDigitalDoc(Context ctx, String digitalDocId) throws IOException {
+        boolean exists = digitalSignExists(ctx, digitalDocId);
         if (!exists) {
-            throw new RuntimeException("The asset "+digitalSignId+" does not exist");
+            throw new RuntimeException("The asset " + digitalDocId + " does not exist");
         }
-        DocumentsSigned documentsSigned = DocumentsSigned.fromJSONString(
-                new String(ctx.getStub().getState(digitalSignId),UTF_8));
 
-        ctx.getStub().delState(digitalSignId);
+        ctx.getStub().delState(digitalDocId);
     }
+
     @Transaction
-    public String queryDS(Context context, String query) throws IOException {
-        List<DocumentsSigned> documentsSignedListList = new ArrayList<>();
+    public String queryDigitalDoc(Context context, String query) throws IOException {
+        List<DigitalDocument> digitalDocumentList = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
 
         Iterator<KeyValue> interator = context.getStub().getQueryResult(query).iterator();
@@ -114,21 +99,21 @@ public class DocumentsContract implements ContractInterface {
         while (interator.hasNext()) {
 
             String key = interator.next().getKey();
-            DocumentsSigned documentsSigned = null;
-            documentsSigned = readDigitalSign(context, key);
-            documentsSignedListList.add(documentsSigned);
+            DigitalDocument digitalDocument = null;
+            digitalDocument = findDigitalDocById(context, key);
+            digitalDocumentList.add(digitalDocument);
         }
         try {
-            return objectMapper.writeValueAsString(documentsSignedListList);
+            return objectMapper.writeValueAsString(digitalDocumentList);
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(DocumentsSigned.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DigitalDocument.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "[]";
 
     }
 
     @Transaction
-    public String getDSHistory(Context context, String key) {
+    public String getHistoryDigitalDoc(Context context, String key) {
         String payload = "";
         List<Map<String, Object>> historylist = new ArrayList<>();
 
